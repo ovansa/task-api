@@ -1,0 +1,11 @@
+package com.ovansa.task_api.domain.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public class RegisterResponse {
+    private String message;
+    private UserResponseDto userResponseDto;
+}

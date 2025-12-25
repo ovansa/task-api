@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 public class RegisterResponse {
     private String message;
-    private UserResponseDto userResponseDto;
+    private UserResponseDto user;
 }

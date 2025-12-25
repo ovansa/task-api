@@ -9,5 +9,5 @@ import lombok.*;
 @Getter
 public class LoginResponse {
     private String token;
-    private UserResponseDto userResponseDto;
+    private UserResponseDto user;
 }

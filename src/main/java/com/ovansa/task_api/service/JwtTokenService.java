@@ -21,6 +21,8 @@ import java.util.Objects;
 public class JwtTokenService {
     private static final String SECRET_ALGORITHM = "HmacSHA256";
 
+    private static final long EXPIRATION_MILLIS = 30L * 24 * 60 * 60 * 1000;
+
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -29,8 +31,8 @@ public class JwtTokenService {
         return Jwts.builder ().claims ()
                 .add (claims)
                 .subject (email)
-                .issuedAt (new Date(System.currentTimeMillis ()))
-                .expiration (new Date (System.currentTimeMillis () + 30L * 24))
+                .issuedAt (new Date ())
+                .expiration (new Date (System.currentTimeMillis () + EXPIRATION_MILLIS))
                 .and()
                 .signWith (getSignInKey())
                 .compact ();

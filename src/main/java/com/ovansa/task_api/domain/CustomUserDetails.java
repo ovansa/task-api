@@ -1,6 +1,7 @@
 package com.ovansa.task_api.domain;
 
 import com.ovansa.task_api.domain.entities.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Getter
 public class CustomUserDetails implements UserDetails {
     private final User user;
 
@@ -27,7 +29,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername () {
-        return user.getPassword ();
+        return user.getEmail ();
     }
 
     @Override

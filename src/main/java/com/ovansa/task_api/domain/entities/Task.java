@@ -25,8 +25,9 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
-    @Column(name = "owner_id")
-    private String ownerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     @Column(nullable = false)
     private Instant createdAt;
@@ -37,10 +38,32 @@ public class Task {
     @Column(nullable = true)
     private Instant completedAt;
 
+    public static Task create(String title, User owner, TaskStatus taskStatus) {
+        Task task = new Task ();
+        task.title = title;
+        task.owner = owner;
+        task.status = taskStatus;
+
+        return task;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeStatus(TaskStatus newStatus) {
+        this.status = newStatus;
+
+        if (newStatus == TaskStatus.COMPLETED) {
+            this.completedAt = Instant.now();
+        }
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+        this.status = TaskStatus.PENDING;
     }
 
     @PreUpdate

@@ -1,5 +1,6 @@
 package com.ovansa.task_api.service;
 
+import com.ovansa.task_api.domain.CustomUserDetails;
 import com.ovansa.task_api.domain.Messages;
 import com.ovansa.task_api.domain.entities.User;
 import com.ovansa.task_api.domain.request.LoginUserRequest;
@@ -15,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -96,5 +98,23 @@ public class AuthenticationService {
             log.warn("Duplicate email registration attempt: email={}", userDto.getEmail());
             throw new DuplicateResourceException(Messages.EMAIL_EXISTS);
         }
+    }
+
+    public User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException(Messages.USER_NOT_AUTHENTICATED);
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+
+        throw new IllegalStateException(Messages.USER_NOT_AUTHENTICATED);
     }
 }

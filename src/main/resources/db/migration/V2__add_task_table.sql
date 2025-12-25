@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS tasks (
+    id UUID PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    owner_id UUID NULL ,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMP NULL,
+    CONSTRAINT fk_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
+);

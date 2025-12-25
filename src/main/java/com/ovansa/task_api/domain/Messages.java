@@ -13,4 +13,12 @@ public class Messages {
     public static final String INVALID_CREDENTIALS = "Invalid username or password";
 
     public static final String USER_REGISTERED_SUCCESSFULLY = "User registered successfully.";
+
+    public static final String TASK_TITLE_REQUIRED = "Task title is required";
+    public static final String TASK_TITLE_TOO_LONG = "Task title must not exceed 255 characters";
+    public static final String USER_NOT_ACTIVE = "User account is inactive";
+    public static final String TASK_CREATED = "Task created successfully.";
+    public static final String TASK_NOT_FOUND = "Task not found.";
+
+    public static final String USER_NOT_AUTHENTICATED = "Not authenticated.";
 }

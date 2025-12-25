@@ -1,11 +1,9 @@
 package com.ovansa.task_api.exception;
 
-public class DuplicateResourceException extends RuntimeException {
-    public DuplicateResourceException () {
-        super("Resource already exists");
-    }
+import org.springframework.http.HttpStatus;
 
-    public DuplicateResourceException (String message) {
-        super(message != null ? message : "Resource already exists");
+public class DuplicateResourceException extends CustomException {
+    public DuplicateResourceException(String message) {
+        super(message, "DUPLICATE_RESOURCE", HttpStatus.CONFLICT);
     }
 }

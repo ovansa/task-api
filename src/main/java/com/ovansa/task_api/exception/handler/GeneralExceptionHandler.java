@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class GeneralExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(ex, ex.getStatus());
     }
 
     @ExceptionHandler(Exception.class)
@@ -33,19 +34,18 @@ public class GeneralExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException ex) {
-        return buildErrorResponse(new CustomException(ex.getMessage(), "DUPLICATE_RESOURCE"), HttpStatus.CONFLICT);
-    }
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        return buildErrorResponse(new CustomException(ex.getMessage(), "INVALID_CREDENTIALS"), HttpStatus.FORBIDDEN);
-    }
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message("Route not found")
+                .errorCode("ROUTE_NOT_FOUND")
+                .build();
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(InvalidCredentialsException ex) {
-        return buildErrorResponse(new CustomException(ex.getMessage(), "INVALID_CREDENTIALS"), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

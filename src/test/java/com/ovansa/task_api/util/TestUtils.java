@@ -1,13 +1,21 @@
 package com.ovansa.task_api.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ovansa.task_api.domain.entities.User;
+import com.ovansa.task_api.domain.request.LoginUserRequest;
 import com.ovansa.task_api.domain.request.RegisterUserRequest;
 import com.ovansa.task_api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 public class TestUtils {
+    private static final ObjectMapper objectMapper = new ObjectMapper ();
+
     public static String randomAlphaNumeric(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
@@ -16,6 +24,22 @@ public class TestUtils {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
+    }
+
+    public static String loginAndGetToken(MockMvc mockMvc, String email, String password) throws Exception {
+        LoginUserRequest loginRequest = new LoginUserRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        String response = mockMvc.perform(post("/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readTree(response).get("token").asText();
     }
 
     public static RegisterUserRequest randomRegisterRequest() {

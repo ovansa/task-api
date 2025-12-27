@@ -2,8 +2,10 @@ package com.ovansa.task_api.controller.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ovansa.task_api.domain.Messages;
+import com.ovansa.task_api.domain.entities.Task;
 import com.ovansa.task_api.domain.entities.User;
 import com.ovansa.task_api.domain.request.CreateTaskRequest;
+import com.ovansa.task_api.domain.request.UpdateTaskRequest;
 import com.ovansa.task_api.repository.TaskRepository;
 import com.ovansa.task_api.repository.UserRepository;
 import com.ovansa.task_api.util.TestUtils;
@@ -20,7 +22,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class TaskCreateTests {
+public class TaskUpdateTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -45,35 +50,35 @@ public class TaskCreateTests {
     private final ObjectMapper objectMapper = new ObjectMapper ();
 
     @Test
-    @DisplayName("Should create task successfully as authenticated user")
-    void shouldCreateTaskAsAuthenticatedUser() throws Exception {
+    @DisplayName("Should update task successfully as authenticated owner")
+    void shouldUpdateTaskAsAuthenticatedUser() throws Exception {
         String rawPassword = "Password@123";
         User user = TestUtils.saveUser(userRepository, passwordEncoder, rawPassword);
-
         String token = TestUtils.loginAndGetToken(mockMvc, user.getEmail(), rawPassword);
 
-        CreateTaskRequest request = new CreateTaskRequest ();
-        request.setTitle ("Eat");
+        Task task = TestUtils.saveTask(taskRepository, user, "Old title");
 
-        mockMvc.perform(post("/task")
+        UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTitle("Updated title");
+
+        mockMvc.perform(put("/task/{id}", task.getId())
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value(Messages.TASK_CREATED))
-                .andExpect(jsonPath("$.data.id").exists())
-                .andExpect(jsonPath("$.data.title").value(request.getTitle()))
-                .andExpect(jsonPath("$.data.status").value("PENDING"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(Messages.TASK_UPDATED))
+                .andExpect(jsonPath("$.data.id").value(task.getId().toString()))
+                .andExpect(jsonPath("$.data.title").value("Updated title"));
     }
 
     @Test
-    @DisplayName("Should fail to create task when user is not authenticated")
-    void shouldFailToCreateTaskWithoutAuthentication() throws Exception {
+    @DisplayName("Should fail to update task when user is not authenticated")
+    void shouldFailToUpdateTaskWithoutAuthentication() throws Exception {
 
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Eat");
+        UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTitle("Updated title");
 
-        mockMvc.perform(post("/task")
+        mockMvc.perform(put("/task/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())

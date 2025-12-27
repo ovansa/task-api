@@ -18,6 +18,7 @@ public class Messages {
     public static final String TASK_TITLE_TOO_LONG = "Task title must not exceed 255 characters";
     public static final String USER_NOT_ACTIVE = "User account is inactive";
     public static final String TASK_CREATED = "Task created successfully.";
+    public static final String TASK_UPDATED = "Task updated successfully.";
     public static final String TASK_NOT_FOUND = "Task not found.";
 
     public static final String USER_NOT_AUTHENTICATED = "Not authenticated.";

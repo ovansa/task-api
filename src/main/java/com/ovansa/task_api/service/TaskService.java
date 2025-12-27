@@ -59,6 +59,7 @@ public class TaskService {
 
     public Task changeStatus(UUID taskId, TaskStatus status) {
         Task task = getTaskOrThrow (taskId);
+        System.out.println ("I got there");
         task.changeStatus(status);
         return taskRepository.save(task);
     }
@@ -69,7 +70,8 @@ public class TaskService {
 
     public Page<Task> getTasksForAuthenticatedUser(Pageable pageable) {
         UUID userId = authenticationService.getAuthenticatedUser ().getId ();
-        return taskRepository.findByOwnerId(userId.toString(), pageable);
+        System.out.println ("UserId" + userId);
+        return taskRepository.findByOwnerId(userId, pageable);
     }
 
     public Page<Task> getAnonymousTasks(Pageable pageable) {

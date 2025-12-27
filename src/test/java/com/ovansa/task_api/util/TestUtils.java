@@ -1,9 +1,12 @@
 package com.ovansa.task_api.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ovansa.task_api.domain.entities.Task;
 import com.ovansa.task_api.domain.entities.User;
 import com.ovansa.task_api.domain.request.LoginUserRequest;
 import com.ovansa.task_api.domain.request.RegisterUserRequest;
+import com.ovansa.task_api.enums.TaskStatus;
+import com.ovansa.task_api.repository.TaskRepository;
 import com.ovansa.task_api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,6 +29,7 @@ public class TestUtils {
         return sb.toString();
     }
 
+    /* Auth helpers */
     public static String loginAndGetToken(MockMvc mockMvc, String email, String password) throws Exception {
         LoginUserRequest loginRequest = new LoginUserRequest();
         loginRequest.setEmail(email);
@@ -50,6 +54,7 @@ public class TestUtils {
         return request;
     }
 
+    /* User helpers */
     public static User saveUser(UserRepository userRepository) {
         String rawPassword = "StrongPass1";
         return saveUser(userRepository, rawPassword);
@@ -82,5 +87,20 @@ public class TestUtils {
                 rawPassword
         );
         return userRepository.save(user);
+    }
+
+    /* Task helpers */
+    public static Task saveTask(
+            TaskRepository taskRepository,
+            User owner,
+            String title
+    ) {
+        Task task = Task.create(
+                title,
+                owner,
+                TaskStatus.PENDING
+        );
+
+        return taskRepository.save(task);
     }
 }

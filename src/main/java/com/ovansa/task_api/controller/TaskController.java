@@ -4,8 +4,10 @@ import com.ovansa.task_api.domain.Messages;
 import com.ovansa.task_api.domain.entities.Task;
 import com.ovansa.task_api.domain.request.CreateTaskRequest;
 import com.ovansa.task_api.domain.request.UpdateTaskRequest;
+import com.ovansa.task_api.domain.request.UpdateTaskStatusRequest;
 import com.ovansa.task_api.domain.response.CreateTaskResponse;
 import com.ovansa.task_api.domain.response.TaskResponseDto;
+import com.ovansa.task_api.domain.response.UpdateTaskResponse;
 import com.ovansa.task_api.enums.TaskStatus;
 import com.ovansa.task_api.exception.BadRequestException;
 import com.ovansa.task_api.service.TaskService;
@@ -25,10 +27,8 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public ResponseEntity<CreateTaskResponse> createTask(@RequestBody CreateTaskRequest request,
-                                                         @RequestParam(required = false) boolean anonymous) throws BadRequestException {
-        Task task = anonymous ? taskService.createAnonymousTask (request.getTitle())
-                : taskService.createTaskForUser (request.getTitle ());
+    public ResponseEntity<CreateTaskResponse> createTask(@RequestBody CreateTaskRequest request) throws BadRequestException {
+        Task task = taskService.createTaskForUser (request.getTitle ());
 
         return new ResponseEntity<>(
                 new CreateTaskResponse(Messages.TASK_CREATED, TaskResponseDto.from(task)),
@@ -37,21 +37,23 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}")
-    public ResponseEntity<TaskResponseDto> updateTask(
+    public ResponseEntity<UpdateTaskResponse> updateTask(
             @PathVariable UUID taskId,
             @RequestBody UpdateTaskRequest request
     ) {
         Task task = taskService.updateTask(taskId, request.getTitle());
-        return ResponseEntity.ok(TaskResponseDto.from(task));
+        return new ResponseEntity<>(new UpdateTaskResponse (Messages.TASK_UPDATED, TaskResponseDto.from (task)),
+                HttpStatus.OK);
     }
 
     @PatchMapping("/{taskId}/status")
-    public ResponseEntity<TaskResponseDto> changeStatus(
+    public ResponseEntity<UpdateTaskResponse> changeStatus(
             @PathVariable UUID taskId,
-            @RequestParam TaskStatus status
-    ) {
-        Task task = taskService.changeStatus(taskId, status);
-        return ResponseEntity.ok(TaskResponseDto.from(task));
+            @RequestBody UpdateTaskStatusRequest request
+            ) {
+        Task task = taskService.changeStatus(taskId, request.getStatus ());
+        return new ResponseEntity<>(new UpdateTaskResponse (Messages.TASK_UPDATED, TaskResponseDto.from (task)),
+                HttpStatus.OK);
     }
 
     @GetMapping("/{taskId}")
@@ -61,10 +63,8 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<TaskResponseDto>> getTasks(@RequestParam(required = false) boolean anonymous, Pageable pageable) {
-        Page<Task> tasks = anonymous
-                ? taskService.getAnonymousTasks(pageable)
-                : taskService.getTasksForAuthenticatedUser(pageable);
+    public ResponseEntity<Page<TaskResponseDto>> getTasks(Pageable pageable) {
+        Page<Task> tasks = taskService.getTasksForAuthenticatedUser(pageable);
 
         return new ResponseEntity<> (tasks.map (TaskResponseDto::from), HttpStatus.OK);
     }
